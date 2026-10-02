@@ -34,6 +34,8 @@ impl Tool {
                 "CODEX_API_KEY",
                 "CODEX_ACCESS_TOKEN",
                 "OPENAI_BASE_URL",
+                "OPENAI_FEDERATION_RULE_ID",
+                "OPENAI_IDENTITY_TOKEN_FILE",
             ],
             Self::Claude => &[
                 "ANTHROPIC_API_KEY",
@@ -48,6 +50,7 @@ impl Tool {
                 "CLAUDE_CODE_USE_BEDROCK",
                 "CLAUDE_CODE_USE_VERTEX",
                 "CLAUDE_CODE_USE_FOUNDRY",
+                "CLAUDE_CODE_USE_ANTHROPIC_AWS",
             ],
         }
     }
