@@ -370,8 +370,11 @@ fn conflicting_auth_environment_is_rejected_without_exposing_values() {
     f.init();
     for (tool, variable) in [
         ("codex", "OPENAI_API_KEY"),
+        ("codex", "OPENAI_FEDERATION_RULE_ID"),
+        ("codex", "OPENAI_IDENTITY_TOKEN_FILE"),
         ("claude", "CLAUDE_CODE_OAUTH_TOKEN"),
         ("claude", "CLAUDE_SECURESTORAGE_CONFIG_DIR"),
+        ("claude", "CLAUDE_CODE_USE_ANTHROPIC_AWS"),
     ] {
         let output = f
             .command()
