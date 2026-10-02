@@ -120,7 +120,11 @@ pub fn select(
 }
 
 pub fn working_dir(path: Option<PathBuf>) -> Result<PathBuf> {
-    crate::config::directory(&path.unwrap_or(std::env::current_dir()?))
+    let path = match path {
+        Some(path) => path,
+        None => std::env::current_dir()?,
+    };
+    crate::config::directory(&path)
 }
 
 #[cfg(test)]
