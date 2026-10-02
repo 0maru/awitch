@@ -79,7 +79,14 @@ pub fn select(
         let depth = if let Some(path) = &rule.path {
             let path = match path.canonicalize() {
                 Ok(path) => path,
-                Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
+                Err(error)
+                    if matches!(
+                        error.kind(),
+                        std::io::ErrorKind::NotFound | std::io::ErrorKind::NotADirectory
+                    ) =>
+                {
+                    continue;
+                }
                 Err(error) => return Err(error).context("cannot resolve rule path"),
             };
             if !cwd.starts_with(&path) {
