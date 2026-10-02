@@ -183,6 +183,44 @@ fn setup_login_and_run_isolate_both_tools_and_preserve_arguments() {
 }
 
 #[test]
+fn passthrough_preserves_argument_separators() {
+    let f = Fixture::new();
+    f.init();
+    for (args, expected) in [
+        (vec!["codex", "--", "--help"], vec!["--", "--help"]),
+        (vec!["claude", "--", "--help"], vec!["--", "--help"]),
+        (
+            vec!["--profile", "personal", "codex", "--", "-Create a summary"],
+            vec!["--", "-Create a summary"],
+        ),
+        (vec!["codex", "--"], vec!["--"]),
+        (
+            vec!["codex", "--", "--", "--help"],
+            vec!["--", "--", "--help"],
+        ),
+        (
+            vec!["codex", "exec", "--", "--help"],
+            vec!["exec", "--", "--help"],
+        ),
+        (
+            vec!["login", "personal", "codex", "--", "--help"],
+            vec!["login", "--", "--help"],
+        ),
+        (
+            vec!["login", "personal", "claude", "--", "--help"],
+            vec!["auth", "login", "--", "--help"],
+        ),
+    ] {
+        let output = f.ok(&args);
+        let forwarded: Vec<_> = output
+            .lines()
+            .filter_map(|line| line.strip_prefix("arg=<").and_then(|s| s.strip_suffix('>')))
+            .collect();
+        assert_eq!(forwarded, expected, "{args:?}");
+    }
+}
+
+#[test]
 fn owner_routing_from_subdirectory_and_linked_worktree() {
     let f = Fixture::new();
     f.init();

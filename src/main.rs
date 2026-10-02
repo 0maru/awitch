@@ -93,7 +93,19 @@ enum RuleAction {
 }
 
 fn run() -> Result<()> {
-    let cli = Cli::parse();
+    let raw_args: Vec<_> = std::env::args_os().collect();
+    let mut cli = Cli::parse_from(&raw_args);
+    let forwarded_args = match &mut cli.command {
+        Action::Codex(args) | Action::Claude(args) => Some(&mut args.args),
+        Action::Login { args, .. } => Some(args),
+        _ => None,
+    };
+    if let Some(args) = forwarded_args {
+        // Clap が転送引数の先頭で消費した区切りだけを元の引数列から戻す。
+        if raw_args[raw_args.len() - args.len() - 1] == "--" {
+            args.insert(0, OsString::from("--"));
+        }
+    }
     let store = Store::from_env()?;
     if cli.profile.is_some() {
         ensure!(
