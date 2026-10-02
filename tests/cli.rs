@@ -254,6 +254,38 @@ fn owner_routing_from_subdirectory_and_linked_worktree() {
 }
 
 #[test]
+fn absolute_cwd_recovers_from_deleted_working_directory() {
+    let f = Fixture::new();
+    f.init();
+    let repo = f.repo();
+    f.ok(&["rule", "add", "work", "--path", repo.to_str().unwrap()]);
+    let deleted = f.root.join("deleted");
+    fs::create_dir(&deleted).unwrap();
+    let command = f.command();
+    let output = Command::new("/bin/sh")
+        .env_clear()
+        .envs(
+            command
+                .get_envs()
+                .map(|(name, value)| (name, value.unwrap())),
+        )
+        .current_dir(&deleted)
+        .args(["-c", "rmdir \"$1\" && shift && exec \"$@\"", "sh"])
+        .arg(&deleted)
+        .arg(env!("CARGO_BIN_EXE_awitch"))
+        .args(["--cwd", repo.to_str().unwrap(), "codex"])
+        .output()
+        .unwrap();
+    assert!(!deleted.exists());
+    let output = success(output);
+    assert!(output.contains(&format!("cwd={}\n", repo.display())));
+    assert!(output.contains(&format!(
+        "home={}\n",
+        f.state.join("profiles/work/codex").display()
+    )));
+}
+
+#[test]
 fn canonical_paths_tilde_boundaries_and_org_and_path() {
     let f = Fixture::new();
     f.init();
