@@ -300,6 +300,13 @@ fn canonical_paths_tilde_boundaries_and_org_and_path() {
         )
         .contains("profile: personal")
     );
+    let obsolete = f.root.join("obsolete");
+    let previous = obsolete.join("project");
+    fs::create_dir_all(&previous).unwrap();
+    f.ok(&["rule", "add", "work", "--path", previous.to_str().unwrap()]);
+    fs::remove_dir_all(&obsolete).unwrap();
+    fs::write(&obsolete, "replaced directory").unwrap();
+    assert!(f.ok(&["which"]).contains("profile: personal"));
 }
 
 #[test]
